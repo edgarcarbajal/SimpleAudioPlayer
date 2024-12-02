@@ -1,6 +1,7 @@
 package com.example.simpleaudioplayer.services
 
 import android.content.Intent
+import android.util.Log
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.exoplayer.ExoPlayer
@@ -32,6 +33,8 @@ class AudioPlayerService : MediaSessionService() {
 
         // Create a MediaSession instance
         mediaSession = MediaSession.Builder(this, player).build()
+
+        Log.d("AudioPlayerService-Test-[mediaSession]", mediaSession.toString())
     }
 
     /**
@@ -58,6 +61,7 @@ class AudioPlayerService : MediaSessionService() {
      * @return The current MediaSession instance. If null, connection was rejected
      */
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? {
+        Log.d("AudioPlayerService-Test", "Session-Get requested!!")
         return mediaSession
     }
 

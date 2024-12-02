@@ -12,8 +12,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
+import androidx.media3.ui.PlayerView
 import com.example.simpleaudioplayer.services.AudioPlayerService
 import com.example.simpleaudioplayer.ui.theme.SimpleAudioPlayerTheme
 import com.example.simpleaudioplayer.views.BottomNavBar
@@ -22,8 +25,8 @@ import com.google.common.util.concurrent.MoreExecutors
 
 class MainActivity : ComponentActivity() {
 
-    private var controllerFuture: ListenableFuture<MediaController>? = null
-    private var playerView: MediaController? = null
+    //private var controllerFuture: ListenableFuture<MediaController>? = null
+    private lateinit var playerView: Player
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,16 +34,17 @@ class MainActivity : ComponentActivity() {
 
         // Init. the MediaController UI - Use to connect to AudioPlayerService to play audio
         val sessionToken = SessionToken(this, ComponentName(this, AudioPlayerService::class.java))
-        controllerFuture = MediaController.Builder(this, sessionToken)
+        val controllerFuture = MediaController.Builder(this, sessionToken)
             .buildAsync()
 
-        controllerFuture?.addListener({
-            playerView = controllerFuture?.get()
+        controllerFuture.addListener({
+            playerView = controllerFuture.get()
         }, MoreExecutors.directExecutor())
 
 
-        Log.d("MediaController-test", "Hello. Below is the playerview/mediacontroller:")
-        Log.d("MediaController-test", playerView.toString())
+        Log.d("MediaController-Test", "Hello!! Testing some values!")
+        Log.d("MediaController-Test-[sessionToken]", sessionToken.toString())
+        //Log.d("MediaController-Test-[playerView]", playerView.toString())
 
 
         // Insert views/composables here
@@ -51,21 +55,14 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    AndroidView(factory = {context ->
+                        PlayerView(context).apply {
+                            player = this.player
+                        }
+                    })
                     BottomNavBar()
                 }
             }
         }
-    }
-
-
-    override fun onStop() {
-        super.onStop()
-
-        controllerFuture?.let {
-            MediaController.releaseFuture(it)
-        }
-        controllerFuture = null
-
-        playerView = null
     }
 }

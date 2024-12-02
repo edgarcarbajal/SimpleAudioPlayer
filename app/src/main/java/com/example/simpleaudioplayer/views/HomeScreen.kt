@@ -15,39 +15,47 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ComposeCompilerApi
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.simpleaudioplayer.R
 
 @Composable
 fun HomeScreen(navController: NavController) {
-    NavigationBar {
+    NavigationBar(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
             Column(
-                modifier = Modifier.fillMaxSize().padding(15.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(15.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .fillMaxWidth()
+                        .height(250.dp)
                         .padding(horizontal = 15.dp, vertical = 10.dp)
-                        .clip(MaterialTheme.shapes.extraLarge)
-                        .border(10.dp, Color.Red)
+                        .clip(MaterialTheme.shapes.large)
                 ) {
                     Image(
                         painter = painterResource(R.drawable.house),
-                        contentDescription = "home_screen_bg",
-                        contentScale = ContentScale.Crop,
+                        contentDescription = "settings_screen_bg",
+                        contentScale = ContentScale.Fit,
                         modifier = Modifier.fillMaxSize()
                     )
                 }
@@ -60,4 +68,11 @@ fun HomeScreen(navController: NavController) {
             }
         }
     }
+}
+
+//showSystemUi = true
+@Preview(showBackground = true)
+@Composable
+fun HomeScreen_Preview() {
+    HomeScreen(rememberNavController())
 }
