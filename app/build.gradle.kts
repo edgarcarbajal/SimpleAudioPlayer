@@ -1,6 +1,8 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -73,4 +75,16 @@ dependencies {
 
     //dependency for the navigation bar
     implementation("androidx.navigation:navigation-compose:2.7.7")
+
+    // Auto-Dependency Injection Framework
+    implementation("com.google.dagger:hilt-android:2.51.1")
+    kapt("com.google.dagger:hilt-android-compiler:2.51.1")
+
+    // Fast & Easy?? Image loading for Jetpack Compose:
+    implementation("com.github.bumptech.glide:glide:4.14.2")
+}
+
+// Allow references to generated code
+kapt {
+    correctErrorTypes = true
 }
