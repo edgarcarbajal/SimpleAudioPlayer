@@ -16,6 +16,10 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 
+
+/*
+    Creates & manages the notification that shows the music player
+*/
 private const val NOTIFICATION_ID = 0xED1
 private const val NOTIFICATION_CHANNEL_NAME = "Notification Channel 0xED1(3793)"
 private const val NOTIFICATION_CHANNEL_ID = "Notification Channel ID: 0xED1(3793)"

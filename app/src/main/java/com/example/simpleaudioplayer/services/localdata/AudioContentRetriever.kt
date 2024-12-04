@@ -15,7 +15,9 @@ import javax.inject.Inject
 // https://www.youtube.com/watch?v=XrcmjIW45u8&t=0s
 
 
-// Use Android DB (ie: filesys) to get songs in local device
+/*
+    Use Android DB (ie: filesys) to get songs in local device
+ */
 class AudioContentRetriever @Inject constructor(@ApplicationContext val context: Context) {
     private var mCursor: Cursor? = null // basically a reference to the DB/filesys in android? - matrix cursor? since DB is stored in table/matrix format
 

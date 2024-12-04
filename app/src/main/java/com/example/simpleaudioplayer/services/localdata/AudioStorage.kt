@@ -7,6 +7,9 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
+/*
+    Gets audio files from device to play
+ */
 // Injecting using "@notations" from Hilt framework - Allows for auto dependency Injection - No manual writing bolierplate
 // to do so yourself
 class AudioStorage @Inject constructor(

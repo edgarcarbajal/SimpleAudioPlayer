@@ -13,16 +13,20 @@ import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import javax.inject.Inject
 
+
+/*
+    Converts data stored in music/media objects into format needed for notification
+ */
 @UnstableApi
 class AudioNotificationAdapter @Inject constructor(
     private val context: Context,
-    private val pendingIntent: PendingIntent?,
+    private val pendingIntent: PendingIntent?, // sort of like a Promise in JS ??? async methods/usage
 ):PlayerNotificationManager.MediaDescriptionAdapter {
     override fun getCurrentContentTitle(player: Player): CharSequence = player.mediaMetadata.albumTitle ?: "Unknown Audio Album Title"
 
     override fun createCurrentContentIntent(player: Player): PendingIntent? = pendingIntent
 
-    override fun getCurrentContentText(player: Player): CharSequence? = player.mediaMetadata.displayTitle ?: "Unknown Audio Title"
+    override fun getCurrentContentText(player: Player): CharSequence = player.mediaMetadata.displayTitle ?: "Unknown Audio Title"
 
     override fun getCurrentLargeIcon(
         player: Player,
