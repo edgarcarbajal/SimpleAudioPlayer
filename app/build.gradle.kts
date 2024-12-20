@@ -82,6 +82,9 @@ dependencies {
 
     // Fast & Easy?? Image loading for Jetpack Compose:
     implementation("com.github.bumptech.glide:glide:4.14.2")
+
+    // Hilt View Model - For Android Compose?
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
 }
 
 // Allow references to generated code
