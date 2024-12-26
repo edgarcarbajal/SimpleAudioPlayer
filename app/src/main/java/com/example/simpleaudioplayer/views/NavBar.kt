@@ -1,22 +1,25 @@
 package com.example.simpleaudioplayer.views
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -24,6 +27,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.simpleaudioplayer.viewmodels.NaviScreens
 import com.example.simpleaudioplayer.viewmodels.NavigationItem
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomNavBar() {
     //initializing the default selected item - similar to react useState??
@@ -41,10 +45,21 @@ fun BottomNavBar() {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            Text("Simple Audio Player")
+            TopAppBar(
+                colors = topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
+                ),
+                title = {
+                    Text("Simple Audio Player")
+                }
+            )
         },
         bottomBar = {
-            NavigationBar {
+            NavigationBar(
+                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                tonalElevation = 8.dp
+            ) {
                 // get navbar items
                 NavigationItem().getNavBarItems().forEachIndexed { idx, navItem ->
                     // set each item given by our navbaritems to the actual navbar
