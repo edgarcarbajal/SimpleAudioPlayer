@@ -2,7 +2,9 @@ package com.example.simpleaudioplayer.views
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.MarqueeAnimationMode
+import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -12,10 +14,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
@@ -28,14 +32,21 @@ import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,13 +54,15 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import com.example.simpleaudioplayer.R
 import com.example.simpleaudioplayer.models.Audio
-import com.example.simpleaudioplayer.services.AudioState
 import kotlin.math.floor
 
 private fun currPosToTimestamp(position: Long): String {
@@ -61,6 +74,7 @@ private fun currPosToTimestamp(position: Long): String {
     else String.format("%d:%02d", totalTruncatedMin, remainingSec)
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BasicAudioHome(
     progress: Float,
@@ -73,9 +87,17 @@ fun BasicAudioHome(
     onNext: () -> Unit,
     onPrevious: () -> Unit,
 ) {
+    // Logic/State vars for Sheet - Should move later on to a view model to decouple logic??? Not sure
+    var showMusicPlayerSheet by remember {
+        mutableStateOf(false)
+    }
+    val musicSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
     Scaffold (
         bottomBar = {
             BottomBarPlayer( // Minimized Audio Player - (might Modify this into a Sheet/card (not sure if Modal or not))
+                modifier = Modifier.clickable { showMusicPlayerSheet = true },
                 audio = currentAudio,
                 progress = progress,
                 onProgress = onProgress,
@@ -84,6 +106,21 @@ fun BasicAudioHome(
                 onNext = onNext,
                 onPrevious = onPrevious,
             )
+            if(showMusicPlayerSheet) {
+                ExpandedMusicBarSheet(
+                    audio = currentAudio,
+                    progress = progress,
+                    onProgress = onProgress,
+                    isAudioPlaying = isAudioPlaying,
+                    onStart = onStart,
+                    onNext = onNext,
+                    onPrevious = onPrevious,
+                    musicSheetState,
+                ) {
+                    // Toggle Showing the Expanded Music Player Sheet when dismissing the sheet
+                    showMusicPlayerSheet = !showMusicPlayerSheet
+                }
+            }
         },
         ){
         LazyColumn(contentPadding = it) {
@@ -100,8 +137,99 @@ fun BasicAudioHome(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ExpandedMusicBarSheet(
+    audio: Audio,
+    progress: Float,
+    onProgress: (Float) -> Unit,
+    isAudioPlaying: Boolean,
+    onStart: () -> Unit,
+    onNext: () -> Unit,
+    onPrevious: () -> Unit,
+    musicSheetState: SheetState,
+    toggleSheetExpansion: () -> Unit,
+) {
+    ModalBottomSheet(
+        onDismissRequest = {
+            //showMusicPlayerSheet = false
+            toggleSheetExpansion()
+        },
+        sheetState = musicSheetState,
+        shape = RoundedCornerShape(16.dp),
+        tonalElevation = 16.dp,
+        dragHandle = {
+            Box(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .width(50.dp)
+                    .height(6.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(MaterialTheme.colorScheme.primary)
+            )
+        }
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(15.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(250.dp)
+                        .padding(horizontal = 15.dp, vertical = 10.dp)
+                        .clip(MaterialTheme.shapes.large)
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.noart),
+                        contentDescription = "expanded_music_player_album_art",
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+
+                Spacer(modifier = Modifier.size(4.dp))
+                Text(
+                    text = audio.title,
+                    style = MaterialTheme.typography.titleLarge,
+                )
+
+                Spacer(modifier = Modifier.size(4.dp))
+                Text(
+                    text = audio.album,
+                    style = MaterialTheme.typography.titleMedium,
+                )
+
+                Spacer(modifier = Modifier.size(8.dp))
+                Text(
+                    text = audio.artist,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+
+                Spacer(modifier = Modifier.size(8.dp))
+                ExpandedMediaPlayerController(
+                    progress = progress,
+                    onProgress = onProgress,
+                    isAudioPlaying = isAudioPlaying,
+                    onStart = onStart,
+                    onNext = onNext,
+                    onPrevious = onPrevious,
+                )
+            }
+        }
+    }
+}
+
 @Composable
 fun BottomBarPlayer(
+    modifier: Modifier,
     audio: Audio,
     progress: Float,
     onProgress: (Float) -> Unit,
@@ -111,6 +239,7 @@ fun BottomBarPlayer(
     onPrevious: () -> Unit,
 ) {
     BottomAppBar (
+        modifier = modifier,
         content = {
             Column(
                 modifier = Modifier.padding(8.dp)
@@ -144,6 +273,63 @@ fun BottomBarPlayer(
             }
         }
     )
+}
+
+@Composable
+fun ExpandedMediaPlayerController(
+    progress: Float,
+    onProgress: (Float) -> Unit,
+    isAudioPlaying: Boolean,
+    onStart: () -> Unit,
+    onNext: () -> Unit,
+    onPrevious: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.weight(2f)
+        ) {
+            Icon(
+                imageVector = Icons.Default.SkipPrevious,
+                modifier = Modifier
+                    .clickable { onPrevious() }
+                    .size(50.dp),
+                contentDescription = null
+            )
+
+            Spacer(modifier = Modifier.padding(16.dp, 0.dp))
+
+            PlayerIconItem(
+                modifier = Modifier.size(50.dp),
+                icon = if (isAudioPlaying) Icons.Default.Pause else Icons.Default.PlayArrow
+            ) {
+                onStart() // toggle start/stop of Audio
+            }
+
+            Spacer(modifier = Modifier.padding(16.dp, 0.dp))
+
+            Icon(
+                imageVector = Icons.Default.SkipNext,
+                modifier = Modifier
+                    .clickable { onNext() }
+                    .size(50.dp),
+                contentDescription = null
+            )
+        }
+
+        Spacer(modifier = Modifier.size(8.dp))
+        // UI for seeking to given pos in audio timeline
+        Slider(
+            modifier = Modifier.weight(1f),
+            value = progress,
+            onValueChange = {onProgress(it)},
+            valueRange = 0f..1f,
+        )
+    }
 }
 
 @Composable
@@ -194,8 +380,12 @@ fun AudioItemCard(
             .fillMaxWidth()
             .padding(12.dp)
             .then(
-                if(isCurrentAudio)
-                    Modifier.border(width = 2.dp, color = MaterialTheme.colorScheme.outline, shape = RoundedCornerShape(8.dp))
+                if (isCurrentAudio)
+                    Modifier.border(
+                        width = 2.dp,
+                        color = MaterialTheme.colorScheme.outline,
+                        shape = RoundedCornerShape(8.dp)
+                    )
                 else
                     Modifier
             )
@@ -315,6 +505,7 @@ fun PlayerIconItem(
         shape = CircleShape,
         border = borderStroke,
         modifier = Modifier
+            .then(modifier)
             .clip(CircleShape)
             .clickable { onClick() },
         contentColor = foregroundColor,
@@ -325,6 +516,7 @@ fun PlayerIconItem(
             contentAlignment = Alignment.Center
             ) {
             Icon(
+                modifier = modifier,
                 imageVector = icon,
                 contentDescription = null
             )
@@ -357,6 +549,26 @@ val dummyAudio2 = Audio(
     "Holiday",
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(showBackground = true)
+@Composable
+fun ExpandedMusicBarSheet_Preview() {
+    // Need to run Interactive Mode inorder to see preview!
+    ExpandedMusicBarSheet(
+        audio = dummyAudio2,
+        progress = 0.5f,
+        onProgress = { /*TODO*/ },
+        isAudioPlaying = false,
+        onStart = { /*TODO*/ },
+        onNext = { /*TODO*/ },
+        onPrevious = { /*TODO*/ },
+        rememberModalBottomSheetState(
+            skipPartiallyExpanded = true
+        )
+    ){}
+}
+
+
 @Preview(showBackground = true)
 @Composable
 fun AudioItemCard_Preview() {
@@ -373,13 +585,15 @@ fun ArtistInfo_Preview() {
 @Composable
 fun BottomBarPlayer_Preview() {
     BottomBarPlayer(
+        modifier = Modifier,
         audio = dummyAudio,
         progress = 0.5f,
         onProgress = { /*TODO*/ },
         isAudioPlaying = false,
         onStart = { /*TODO*/ },
         onNext = { /*TODO*/ },
-    ) {}
+        onPrevious = { /*TODO*/ },
+    )
 }
 
 @Preview(showSystemUi = true)
