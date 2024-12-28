@@ -12,6 +12,7 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -108,17 +109,18 @@ fun BasicAudioHome(
             )
             if(showMusicPlayerSheet) {
                 ExpandedMusicBarSheet(
-                    audio = currentAudio,
-                    progress = progress,
-                    onProgress = onProgress,
-                    isAudioPlaying = isAudioPlaying,
-                    onStart = onStart,
-                    onNext = onNext,
-                    onPrevious = onPrevious,
                     musicSheetState,
+                    toggleSheetExpansion = { showMusicPlayerSheet = !showMusicPlayerSheet} // Toggle Showing the Expanded Music Player Sheet when dismissing the sheet
                 ) {
-                    // Toggle Showing the Expanded Music Player Sheet when dismissing the sheet
-                    showMusicPlayerSheet = !showMusicPlayerSheet
+                    ExpandedMusicBarInfo(
+                        audio = currentAudio,
+                        progress = progress,
+                        onProgress = onProgress,
+                        isAudioPlaying = isAudioPlaying,
+                        onStart = onStart,
+                        onNext = onNext,
+                        onPrevious = onPrevious,
+                    )
                 }
             }
         },
@@ -137,9 +139,8 @@ fun BasicAudioHome(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExpandedMusicBarSheet(
+fun ExpandedMusicBarInfo(
     audio: Audio,
     progress: Float,
     onProgress: (Float) -> Unit,
@@ -147,8 +148,70 @@ fun ExpandedMusicBarSheet(
     onStart: () -> Unit,
     onNext: () -> Unit,
     onPrevious: () -> Unit,
+) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(15.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(250.dp)
+                    .padding(horizontal = 15.dp, vertical = 10.dp)
+                    .clip(MaterialTheme.shapes.large)
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.noart),
+                    contentDescription = "expanded_music_player_album_art",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
+            Spacer(modifier = Modifier.size(4.dp))
+            Text(
+                text = audio.title,
+                style = MaterialTheme.typography.titleLarge,
+            )
+
+            Spacer(modifier = Modifier.size(4.dp))
+            Text(
+                text = audio.album,
+                style = MaterialTheme.typography.titleMedium,
+            )
+
+            Spacer(modifier = Modifier.size(8.dp))
+            Text(
+                text = audio.artist,
+                style = MaterialTheme.typography.bodySmall,
+            )
+
+            Spacer(modifier = Modifier.size(8.dp))
+            ExpandedMediaPlayerController(
+                progress = progress,
+                onProgress = onProgress,
+                isAudioPlaying = isAudioPlaying,
+                onStart = onStart,
+                onNext = onNext,
+                onPrevious = onPrevious,
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ExpandedMusicBarSheet(
     musicSheetState: SheetState,
     toggleSheetExpansion: () -> Unit,
+    content: @Composable (ColumnScope.() -> Unit) // Used for when we want to place another View/Composable inside the Sheet
 ) {
     ModalBottomSheet(
         onDismissRequest = {
@@ -169,61 +232,7 @@ fun ExpandedMusicBarSheet(
             )
         }
     ) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(15.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(250.dp)
-                        .padding(horizontal = 15.dp, vertical = 10.dp)
-                        .clip(MaterialTheme.shapes.large)
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.noart),
-                        contentDescription = "expanded_music_player_album_art",
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
-
-                Spacer(modifier = Modifier.size(4.dp))
-                Text(
-                    text = audio.title,
-                    style = MaterialTheme.typography.titleLarge,
-                )
-
-                Spacer(modifier = Modifier.size(4.dp))
-                Text(
-                    text = audio.album,
-                    style = MaterialTheme.typography.titleMedium,
-                )
-
-                Spacer(modifier = Modifier.size(8.dp))
-                Text(
-                    text = audio.artist,
-                    style = MaterialTheme.typography.bodySmall,
-                )
-
-                Spacer(modifier = Modifier.size(8.dp))
-                ExpandedMediaPlayerController(
-                    progress = progress,
-                    onProgress = onProgress,
-                    isAudioPlaying = isAudioPlaying,
-                    onStart = onStart,
-                    onNext = onNext,
-                    onPrevious = onPrevious,
-                )
-            }
-        }
+       content()
     }
 }
 
@@ -284,51 +293,57 @@ fun ExpandedMediaPlayerController(
     onNext: () -> Unit,
     onPrevious: () -> Unit
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
+    Card(
+        modifier = Modifier.padding(4.dp)
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.weight(2f)
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Bottom,
         ) {
-            Icon(
-                imageVector = Icons.Default.SkipPrevious,
-                modifier = Modifier
-                    .clickable { onPrevious() }
-                    .size(50.dp),
-                contentDescription = null
-            )
-
-            Spacer(modifier = Modifier.padding(16.dp, 0.dp))
-
-            PlayerIconItem(
-                modifier = Modifier.size(50.dp),
-                icon = if (isAudioPlaying) Icons.Default.Pause else Icons.Default.PlayArrow
+            Spacer(modifier = Modifier.size(8.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                onStart() // toggle start/stop of Audio
+                Icon(
+                    imageVector = Icons.Default.SkipPrevious,
+                    modifier = Modifier
+                        .clickable { onPrevious() }
+                        .size(50.dp),
+                    contentDescription = null
+                )
+
+                Spacer(modifier = Modifier.padding(16.dp, 0.dp))
+
+                PlayerIconItem(
+                    modifier = Modifier.size(50.dp),
+                    icon = if (isAudioPlaying) Icons.Default.Pause else Icons.Default.PlayArrow
+                ) {
+                    onStart() // toggle start/stop of Audio
+                }
+
+                Spacer(modifier = Modifier.padding(16.dp, 0.dp))
+
+                Icon(
+                    imageVector = Icons.Default.SkipNext,
+                    modifier = Modifier
+                        .clickable { onNext() }
+                        .size(50.dp),
+                    contentDescription = null
+                )
             }
 
-            Spacer(modifier = Modifier.padding(16.dp, 0.dp))
-
-            Icon(
-                imageVector = Icons.Default.SkipNext,
+            Spacer(modifier = Modifier.size(8.dp))
+            // UI for seeking to given pos in audio timeline
+            Slider(
                 modifier = Modifier
-                    .clickable { onNext() }
-                    .size(50.dp),
-                contentDescription = null
+                    .padding(2.dp),
+                //.weight(1f),
+                value = progress,
+                onValueChange = {onProgress(it)},
+                valueRange = 0f..1f,
             )
         }
-
-        Spacer(modifier = Modifier.size(8.dp))
-        // UI for seeking to given pos in audio timeline
-        Slider(
-            modifier = Modifier.weight(1f),
-            value = progress,
-            onValueChange = {onProgress(it)},
-            valueRange = 0f..1f,
-        )
     }
 }
 
@@ -549,22 +564,31 @@ val dummyAudio2 = Audio(
     "Holiday",
 )
 
+@Preview(showBackground = true)
+@Composable
+fun ExpandedMusicBarInfo_Preview() {
+    ExpandedMusicBarInfo(
+        audio = dummyAudio2,
+        progress = 0.4f,
+        onProgress = { /*TODO*/ },
+        isAudioPlaying = true,
+        onStart = { /*TODO*/ },
+        onNext = { /*TODO*/ },
+        onPrevious = { /*TODO*/ },
+    )
+}
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
 fun ExpandedMusicBarSheet_Preview() {
     // Need to run Interactive Mode inorder to see preview!
     ExpandedMusicBarSheet(
-        audio = dummyAudio2,
-        progress = 0.5f,
-        onProgress = { /*TODO*/ },
-        isAudioPlaying = false,
-        onStart = { /*TODO*/ },
-        onNext = { /*TODO*/ },
-        onPrevious = { /*TODO*/ },
         rememberModalBottomSheetState(
             skipPartiallyExpanded = true
-        )
+        ),
+        toggleSheetExpansion = {}
     ){}
 }
 
