@@ -19,16 +19,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.simpleaudioplayer.viewmodels.AudioViewModel
 import com.example.simpleaudioplayer.viewmodels.NaviScreens
 import com.example.simpleaudioplayer.viewmodels.NavigationItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomNavBar() {
+fun BottomNavBar(
+    startAudioService: () -> Unit,
+) {
     //initializing the default selected item - similar to react useState??
     var navbarSelectedItem by remember {
         mutableStateOf(0)
@@ -94,8 +98,13 @@ fun BottomNavBar() {
             startDestination = NaviScreens.Home.route,
             modifier = Modifier.padding(paddingValues = paddingValues)
         ) {
-            composable(NaviScreens.Home.route) {
-                HomeScreen(navController = navController)
+            composable(NaviScreens.Home.route) {backStackEntry ->
+                val audioParentVM = hiltViewModel<AudioViewModel>()
+                HomeScreen(
+                    startAudioService,
+                    navController = navController,
+                    audioParentVM
+                )
             }
 
             composable(NaviScreens.Search.route) {
@@ -112,5 +121,7 @@ fun BottomNavBar() {
 @Preview(showBackground = true)
 @Composable
 fun BottomNavBar_Preview() {
-    BottomNavBar()
+    BottomNavBar(
+        startAudioService = {}
+    )
 }

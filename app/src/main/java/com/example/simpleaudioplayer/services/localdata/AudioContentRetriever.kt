@@ -75,13 +75,13 @@ class AudioContentRetriever @Inject constructor(@ApplicationContext val context:
                     while(cursor.moveToNext()) { // loop thru rows in DB until found all songs in query - do one row at a time
                         // get the actual values stored in cols
                         val id = getLong(idColIdx)
-                        val displayName = getString(displayNameColIdx)
-                        val data = getString(dataColIdx)
+                        val displayName = getString(displayNameColIdx) ?: "[Display/File Name N/A]"
+                        val data = getString(dataColIdx) ?: "[Data N/A]"
                         val duration = getInt(durationColIdx)
-                        val title = getString(titleColIdx)
-                        val album = getString(albumColIdx)
-                        val artist = getString(artistColIdx)
-                        val genre = getString(genreColIdx)
+                        val title = getString(titleColIdx) ?: "[Title N/A]"
+                        val album = getString(albumColIdx) ?: "[Album N/A]"
+                        val artist = getString(artistColIdx) ?: "[Artist N/A]"
+                        val genre = getString(genreColIdx) ?: "[Genre N/A]"
 
                         val uri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id)
 

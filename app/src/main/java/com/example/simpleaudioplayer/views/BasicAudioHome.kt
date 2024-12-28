@@ -479,7 +479,7 @@ fun ArtistInfo(
             modifier = Modifier
                 .basicMarquee( // these 4 lines should add a focus animation where overflow text scrolls when focused on
                     animationMode = MarqueeAnimationMode.WhileFocused,
-                    delayMillis = 1000
+                    repeatDelayMillis = 1000
                 )
                 .focusRequester(focusRequester)
                 .focusable()

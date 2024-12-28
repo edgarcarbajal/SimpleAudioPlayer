@@ -85,8 +85,14 @@ dependencies {
 
     // Hilt View Model - For Android Compose?
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+    // Hilt For navigation (passing viewmodels to diff screens)
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
+    // Extra icons for Audio Player
     implementation("androidx.compose.material:material-icons-extended-android:1.7.6")
+
+    // Permission Handler Library
+    implementation("com.google.accompanist:accompanist-permissions:0.37.0")
 }
 
 // Allow references to generated code

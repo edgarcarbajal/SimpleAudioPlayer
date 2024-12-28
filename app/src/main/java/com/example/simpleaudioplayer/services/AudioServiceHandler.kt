@@ -29,6 +29,10 @@ class AudioServiceHandler @Inject constructor(
 
     private var job: Job? = null // background job - basically run code in background (without user interaction)
 
+    // Used to init the Player.Listener & to get output from Player
+    init {
+        exoPlayer.addListener(this)
+    }
 
     // add 1 audio track to queue
     fun addMediaItem(mediaItem: MediaItem) {
@@ -130,7 +134,7 @@ class AudioServiceHandler @Inject constructor(
         _audioState.value = AudioState.CurrentlyPlaying(exoPlayer.currentMediaItemIndex)
 
         if(isPlaying) { // Recommended not to use GlobalScope to run this coroutine job - Just doing it here due to simplicity/How its done in video
-            GlobalScope.launch(Dispatchers.IO) {
+            GlobalScope.launch(Dispatchers.Main) {
                 startAudioProgress()
             }
         }

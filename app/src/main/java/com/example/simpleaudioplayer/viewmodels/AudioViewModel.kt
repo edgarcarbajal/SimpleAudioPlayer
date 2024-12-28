@@ -77,6 +77,14 @@ class AudioViewModel @Inject constructor(
         }
     }
 
+    // Stop the Player from playing Audio once app/VM is closed?
+    override fun onCleared() {
+        viewModelScope.launch {
+            audioServiceHandler.onPlayerEvents(PlayerEvent.Stop)
+        }
+        super.onCleared()
+    }
+
     private fun loadAudioData() {
         viewModelScope.launch {
             val audio = databaseRepo.getAudioData()
@@ -142,7 +150,14 @@ class AudioViewModel @Inject constructor(
             UIEvents.SeekToPrevious -> audioServiceHandler.onPlayerEvents(PlayerEvent.SeekToPrevious)
             is UIEvents.SeekTo -> audioServiceHandler.onPlayerEvents(PlayerEvent.SeekTo, seekPosition = ((duration * uiEvents.position) / 100f).toLong())
             is UIEvents.SelectedAudioChange -> audioServiceHandler.onPlayerEvents(PlayerEvent.SelectedAudioChange, selectedAudioIndex = uiEvents.index)
-            is UIEvents.UpdateProgress -> audioServiceHandler.onPlayerEvents(PlayerEvent.UpdateProgress(uiEvents.newProgress))
+            is UIEvents.UpdateProgress -> {
+                // Update progress on Player
+                audioServiceHandler.onPlayerEvents(
+                    PlayerEvent.UpdateProgress(uiEvents.newProgress)
+                )
+                // Update progress in ViewModel (so that it shows up in UI)
+                progress = uiEvents.newProgress
+            }
         }
     }
 }
