@@ -21,9 +21,12 @@ fun HomeScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
+        // TODO list:
+        // Fix slider updating too fast (might be because of expanded view)
         BasicAudioHome(
+            progressString = audioVM.progressString,
             progress = audioVM.progress,
-            onProgress = { audioVM.onUIEvents(UIEvents.SeekTo(it)) },
+            onProgress = { audioVM.onUIEvents(UIEvents.UpdateProgress(it)) },
             isAudioPlaying = audioVM.isPlaying,
             currentAudio = audioVM.currentSelectedAudio,
             audioList = audioVM.audioList,

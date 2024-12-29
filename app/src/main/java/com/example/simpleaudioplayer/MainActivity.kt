@@ -25,7 +25,7 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint // Needed to insert the DI classes/services we made for AudioPlayer using Hilt
 class MainActivity : ComponentActivity() {
-    private val audioVM: AudioViewModel by viewModels()
+    //private val audioVM: AudioViewModel by viewModels()
     private var isServiceRunning = false
     @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {

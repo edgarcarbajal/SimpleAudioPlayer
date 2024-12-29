@@ -1,7 +1,8 @@
 package com.example.simpleaudioplayer.views
 
+import android.content.res.Resources
+import android.graphics.BitmapFactory
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.MarqueeAnimationMode
 import androidx.compose.foundation.background
@@ -54,6 +55,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -66,18 +68,19 @@ import com.example.simpleaudioplayer.R
 import com.example.simpleaudioplayer.models.Audio
 import kotlin.math.floor
 
-private fun currPosToTimestamp(position: Long): String {
-    val totalTruncatedSec = floor(position / 1E3).toInt()
+private fun currDurationToTimestamp(duration: Long): String {
+    val totalTruncatedSec = floor(duration / 1E3).toInt()
     val totalTruncatedMin = totalTruncatedSec / 60
     val remainingSec = totalTruncatedSec - (totalTruncatedMin * 60)
 
-    return if(position < 0) "--:--"
+    return if(duration < 0) "--:--"
     else String.format("%d:%02d", totalTruncatedMin, remainingSec)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BasicAudioHome(
+    progressString: String,
     progress: Float,
     onProgress: (Float) -> Unit, // function param that takes a float, and returns a Unit
     isAudioPlaying: Boolean,
@@ -100,6 +103,7 @@ fun BasicAudioHome(
             BottomBarPlayer( // Minimized Audio Player - (might Modify this into a Sheet/card (not sure if Modal or not))
                 modifier = Modifier.clickable { showMusicPlayerSheet = true },
                 audio = currentAudio,
+                progressString = progressString,
                 progress = progress,
                 onProgress = onProgress,
                 isAudioPlaying = isAudioPlaying,
@@ -114,6 +118,7 @@ fun BasicAudioHome(
                 ) {
                     ExpandedMusicBarInfo(
                         audio = currentAudio,
+                        progressString = progressString,
                         progress = progress,
                         onProgress = onProgress,
                         isAudioPlaying = isAudioPlaying,
@@ -142,6 +147,7 @@ fun BasicAudioHome(
 @Composable
 fun ExpandedMusicBarInfo(
     audio: Audio,
+    progressString: String,
     progress: Float,
     onProgress: (Float) -> Unit,
     isAudioPlaying: Boolean,
@@ -167,12 +173,14 @@ fun ExpandedMusicBarInfo(
                     .padding(horizontal = 15.dp, vertical = 10.dp)
                     .clip(MaterialTheme.shapes.large)
             ) {
-                Image(
-                    painter = painterResource(R.drawable.noart),
-                    contentDescription = "expanded_music_player_album_art",
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.fillMaxSize()
-                )
+                audio.albumArt?.let {
+                    Image(
+                        bitmap = it,
+                        contentDescription = "expanded_music_player_album_art",
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.size(4.dp))
@@ -194,7 +202,10 @@ fun ExpandedMusicBarInfo(
             )
 
             Spacer(modifier = Modifier.size(8.dp))
+
             ExpandedMediaPlayerController(
+                progressString = progressString,
+                durationString = currDurationToTimestamp(audio.duration.toLong()),
                 progress = progress,
                 onProgress = onProgress,
                 isAudioPlaying = isAudioPlaying,
@@ -238,6 +249,7 @@ fun ExpandedMusicBarSheet(
 
 @Composable
 fun BottomBarPlayer(
+    progressString: String,
     modifier: Modifier,
     audio: Audio,
     progress: Float,
@@ -271,6 +283,10 @@ fun BottomBarPlayer(
                         onPrevious = onPrevious
                     )
 
+                    Text(
+                        text = String.format("%s/%s", progressString, currDurationToTimestamp(audio.duration.toLong()))
+                    )
+
                     // UI for seeking to given pos in audio timeline
                     Slider(
                         modifier = Modifier.weight(1f),
@@ -286,6 +302,8 @@ fun BottomBarPlayer(
 
 @Composable
 fun ExpandedMediaPlayerController(
+    progressString: String,
+    durationString: String,
     progress: Float,
     onProgress: (Float) -> Unit,
     isAudioPlaying: Boolean,
@@ -334,6 +352,9 @@ fun ExpandedMediaPlayerController(
             }
 
             Spacer(modifier = Modifier.size(8.dp))
+            Text(
+                text = String.format("%s/%s", progressString, durationString)
+            )
             // UI for seeking to given pos in audio timeline
             Slider(
                 modifier = Modifier
@@ -442,7 +463,7 @@ fun AudioItemCard(
                )
            }
            Text(
-               text = currPosToTimestamp(audio.duration.toLong()),
+               text = currDurationToTimestamp(audio.duration.toLong()),
                style = MaterialTheme.typography.bodySmall,
                overflow = TextOverflow.Ellipsis,
                maxLines = 1,
@@ -452,7 +473,6 @@ fun AudioItemCard(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ArtistInfo(
     modifier: Modifier = Modifier,
@@ -464,14 +484,6 @@ fun ArtistInfo(
         ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        PlayerIconItem(
-            icon = Icons.Default.MusicNote,
-            borderStroke = BorderStroke(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        ){}
-        
         Spacer(modifier = Modifier.size(4.dp))
 
         val focusRequester = remember{ FocusRequester() }
@@ -549,6 +561,7 @@ val dummyAudio = Audio(
     0,
     "Merry Christmas",
     "Jolly Holidays Vol. 1",
+    null,
     "Random artist",
     "Holiday",
 )
@@ -560,6 +573,7 @@ val dummyAudio2 = Audio(
     350000,
     "Please Christmas Don't Be Late",
     "Jolly Holidays Vol. 1",
+    null,
     "Random artist",
     "Holiday",
 )
@@ -569,6 +583,7 @@ val dummyAudio2 = Audio(
 fun ExpandedMusicBarInfo_Preview() {
     ExpandedMusicBarInfo(
         audio = dummyAudio2,
+        progressString = "2:20",
         progress = 0.4f,
         onProgress = { /*TODO*/ },
         isAudioPlaying = true,
@@ -611,6 +626,7 @@ fun BottomBarPlayer_Preview() {
     BottomBarPlayer(
         modifier = Modifier,
         audio = dummyAudio,
+        progressString = "0:00",
         progress = 0.5f,
         onProgress = { /*TODO*/ },
         isAudioPlaying = false,
@@ -624,6 +640,7 @@ fun BottomBarPlayer_Preview() {
 @Composable
 fun BasicAudioHome_Preview() {
     BasicAudioHome(
+        progressString = "0:00",
         progress = 0.5f,
         onProgress = { /*TODO*/ },
         isAudioPlaying = true,

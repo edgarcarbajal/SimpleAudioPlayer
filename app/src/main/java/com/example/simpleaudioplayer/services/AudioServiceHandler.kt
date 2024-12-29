@@ -142,6 +142,14 @@ class AudioServiceHandler @Inject constructor(
             stopAudioProgress()
         }
     }
+
+    override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+        super.onMediaItemTransition(mediaItem, reason)
+
+        // Change the local state to reflect the new mediaItem/Audio that player has switched too (Should fix UI bug where Info wouldn't update after song ends, and goes to next in queue)
+        _audioState.value = AudioState.Playing(true)
+        _audioState.value = AudioState.CurrentlyPlaying(exoPlayer.currentMediaItemIndex)
+    }
 }
 
 

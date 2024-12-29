@@ -1,8 +1,11 @@
 package com.example.simpleaudioplayer.viewmodels
 
+import android.content.res.Resources
+import android.graphics.BitmapFactory
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -10,6 +13,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.saveable
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import com.example.simpleaudioplayer.R
 import com.example.simpleaudioplayer.models.Audio
 import com.example.simpleaudioplayer.services.AudioServiceHandler
 import com.example.simpleaudioplayer.services.AudioState
@@ -32,6 +36,7 @@ private val audioDefaultDummy = Audio(
     0,
     "",
     "",
+    null,
     "",
     "",
 )
@@ -45,7 +50,7 @@ class AudioViewModel @Inject constructor(
     // Similar to the @State & @Observable behavior in iOS dev? where updates/changes on any of the saveable states causes a refresh in UI
     var duration by savedStateHandle.saveable{ mutableLongStateOf(0L) } // Time of Audio in ms
     var progress by savedStateHandle.saveable{ mutableFloatStateOf(0f) } // progress of audio in percentage(aka: bar) format
-    var progressString by savedStateHandle.saveable{ mutableStateOf("00:00") } // progress of audio in string format
+    var progressString by savedStateHandle.saveable{ mutableStateOf("0:00") } // progress of audio in string format
     var isPlaying by savedStateHandle.saveable{ mutableStateOf(false) }     // song playing state
     var currentSelectedAudio by savedStateHandle.saveable{ mutableStateOf(audioDefaultDummy) }  // currently selected song in UI
     var audioList by savedStateHandle.saveable{ mutableStateOf(listOf<Audio>()) }   // List of songs displayed to user
@@ -116,27 +121,24 @@ class AudioViewModel @Inject constructor(
     // functions used in class for init & other stuff to update UI
 
     // calculate the current progress of song (in percentage value)
-    private fun calcAudioProgressValue(currProgress: Long) {
-        progress = if(currProgress > 0)
-                        ((currProgress.toFloat() / duration.toFloat()) * 100f)
+    private fun calcAudioProgressValue(currProgressMS: Long) {
+        progress = if(currProgressMS > 0) (currProgressMS.toFloat() / duration.toFloat())
                     else
                         0f
 
-        progressString = formatDurationStr(currProgress)
+        progressString = formatDurationStr(currProgressMS)
     }
 
     fun formatDurationStr(currDuration: Long): String {
-        // Duration is in form of ms, so convert to minutes (return val is a Long, so will lose some precision(ie: seconds) here!)
-        val minutes = TimeUnit.MINUTES.convert(currDuration, TimeUnit.MILLISECONDS)
+        // Duration is in form of ms, so convert to min:sec (return val is a Long, so will lose some precision(ie: seconds) here!)
+        val truncatedSec = TimeUnit.SECONDS.convert(currDuration, TimeUnit.MILLISECONDS)
+        val truncatedMin = TimeUnit.MINUTES.convert(truncatedSec, TimeUnit.SECONDS) // Minutes in the string
 
-        // Get the missing precision from our minutes conversion by converting back to ms, then subtracting new conversion with original duration
-        val truncatedMilli = currDuration - TimeUnit.MILLISECONDS.convert(minutes, TimeUnit.MINUTES)
+        // seconds that were leftover from Minutes string
+        val leftoverSec = truncatedSec - TimeUnit.SECONDS.convert(truncatedMin, TimeUnit.MINUTES)
 
-        // use leftover to calculate seconds
-        val seconds = TimeUnit.SECONDS.convert(truncatedMilli, TimeUnit.SECONDS)
-            //minutes - (TimeUnit.SECONDS.convert(1, TimeUnit.SECONDS)) //<-- how it was written in video, but I did not understand how this would get us the right minutes (unless its due to overflow/underflow of long?)
 
-        return String.format("%02d:%02d", minutes, seconds)
+        return String.format("%d:%02d", truncatedMin, leftoverSec)
     }
 
     // These "viewModelScope" coroutines will launch when we have JetPack compose launch them! (ie: the UI/ View)
