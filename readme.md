@@ -17,17 +17,27 @@ For best experience, please use Android Studio to run the code.
 
 
 ## Current Medium-Major Issues/ TODO List (not sure if all fixable):
-- Issue with Parcel library that causes app to crash at times: 
+- **(DONE)** Issue with Parcel library that causes app to crash at times: 
 ```
 java.lang.illegalargumentexception: Parcel: unknown type for value Audio(...)
 ```
->The location where this line shows up does not say but I assume is around the `AudioContentRetriever` or `AudioViewModel`. It also happens often when large amount of audio files(just due to the fact of more opportunity to fail due to creating more Audio objects)
+>After a bit of on-device manual testing, it seems like this error only appears when trying to exit the app (using home button/home gesture).   
+>Must be something wrong setup with the AudioService that does not allow it to pass Audio items thru Parcel in the background?? Fix this, and background music playback should also be fixed.
 
-- Background play of audio is not implemented, or is missing? (Need to check this one for sure)
+> Update(1/13/2025) - Fixed: App was sending the Audio media items thru IPC in android system (using the `Intent` class/object. All objects need sent thru `Intent` need to be `Parcelable`. A little Similar to what iOS does when it needs to decode data from JSON or plist files - data class needs to implement `Decodable` in order to work.
+> Thanks to [this blog post](https://prasanta-paul.blogspot.com/2010/06/android-parcelable-example.html) which helped me understand what I might needed to do.
 
-- App does not handle well with a large list of audio files (Not sure the cutoff point - Tested 1 device with around 600+ files)
+- **(DONE FOR NOW)** App does not handle well with a large list of audio files (Not sure the cutoff point - Tested 1 device with around 600+ files)
 
-- It takes a while to load the audio list when large (5-15 sec) after accepting permissions (Might even require a few app reboots)
+- **(DONE FOR NOW)** It takes a while to load the audio list when large (5-15 sec) after accepting permissions (Might even require a few app reboots)
+
+>Both items above (relating with speed of loading app) was found to be caused by retrieving album art
+>when getting the list of audio files from device DB. To fix, going to implement a way so that we only get the album art of the current song (since that is the only one that can be seen in the UI anyway) using URI somehow?
+
+> Update (1/13/2025): Fixed the 2 issues above by removing the artwork retrieval, tried making a new artwork retrieval, but still not working correctly
+
+
 
 - Some songs show playback when they are not playing back audio (only in large audio lists) Happens frequently when skipping/changing to other songs 
+> Something to note from the on-device manual testing, it seems like sometimes the same songs are the ones that do not load up? - maybe its a loading issue? (like when the songs were added in list?)
 

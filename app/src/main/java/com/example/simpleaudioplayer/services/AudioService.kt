@@ -34,11 +34,18 @@ class AudioService:MediaSessionService() {
         return super.onStartCommand(intent, flags, startId)
     }
 
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        val player = mediaSession.player
+        // If exiting app, check if player has no more songs in queue -
+        // If no more, then stop player, else keep playing music (ie: acts like background music play)
+        if(!player.playWhenReady || player.mediaItemCount == 0) {
+            stopSelf()
+        }
+    }
+
     // Same as saying "return mediaSession" in code!
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession = mediaSession
     override fun onDestroy() {
-        super.onDestroy()
-
         mediaSession.apply {
             release() // remove any connections to given session
             if(player.playbackState != Player.STATE_IDLE) { // stops music playing if there was any - resets pos to 0
@@ -46,6 +53,9 @@ class AudioService:MediaSessionService() {
                 player.playWhenReady = false
                 player.stop()
             }
+            player.release()
         }
+
+        super.onDestroy()
     }
 }

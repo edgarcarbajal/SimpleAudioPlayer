@@ -1,11 +1,8 @@
 package com.example.simpleaudioplayer.viewmodels
 
-import android.content.res.Resources
-import android.graphics.BitmapFactory
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -13,7 +10,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.saveable
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
-import com.example.simpleaudioplayer.R
 import com.example.simpleaudioplayer.models.Audio
 import com.example.simpleaudioplayer.services.AudioServiceHandler
 import com.example.simpleaudioplayer.services.AudioState

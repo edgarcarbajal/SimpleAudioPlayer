@@ -2,23 +2,12 @@ package com.example.simpleaudioplayer.services.localdata
 
 import android.content.ContentUris
 import android.content.Context
-import android.content.res.Resources
 import android.database.Cursor
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.provider.MediaStore
 import android.util.Log
-import android.util.Size
 import androidx.annotation.WorkerThread
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.res.imageResource
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.toBitmap
-import com.example.simpleaudioplayer.R
 import com.example.simpleaudioplayer.models.Audio
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.io.IOException
 import javax.inject.Inject
 
 
@@ -97,21 +86,19 @@ class AudioContentRetriever @Inject constructor(@ApplicationContext val context:
                         val uri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id)
 
                         //use uri to get album art if exists
-                        var albumArt: ImageBitmap?
-                        try {
-                            val albumArtBM = context.contentResolver.loadThumbnail(
-                                uri,
-                                Size(426, 426),
-                                null
-                            )
-
-                            albumArt = albumArtBM.asImageBitmap()
-                        }
-                        catch (e: IOException) {
-                            albumArt =
-                                ContextCompat.getDrawable(context, R.drawable.noart)?.toBitmap()
-                                    ?.asImageBitmap()
-                        }
+                        val albumArt = null
+//                        val albumArt: ImageBitmap? = try {
+//                            val albumArtBM = context.contentResolver.loadThumbnail(
+//                                uri,
+//                                Size(426, 426),
+//                                null
+//                            )
+//
+//                            albumArtBM.asImageBitmap()
+//                        } catch (e: IOException) {
+//                            ContextCompat.getDrawable(context, R.drawable.noart)?.toBitmap()
+//                                ?.asImageBitmap()
+//                        }
 
                         // Make a new Audio instance(ie: new song) & save into list to return
                         audioList += Audio(

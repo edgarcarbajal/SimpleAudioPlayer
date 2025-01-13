@@ -1,7 +1,6 @@
 package com.example.simpleaudioplayer.views
 
-import android.content.res.Resources
-import android.graphics.BitmapFactory
+import android.graphics.drawable.Drawable
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.MarqueeAnimationMode
@@ -27,7 +26,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.SkipNext
@@ -55,15 +53,21 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import com.bumptech.glide.Glide
+import com.bumptech.glide.RequestBuilder
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
+import com.bumptech.glide.integration.compose.placeholder
+import com.bumptech.glide.integration.compose.rememberGlidePreloadingData
+import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
 import com.example.simpleaudioplayer.R
 import com.example.simpleaudioplayer.models.Audio
 import kotlin.math.floor
@@ -144,6 +148,7 @@ fun BasicAudioHome(
     }
 }
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun ExpandedMusicBarInfo(
     audio: Audio,
@@ -171,15 +176,26 @@ fun ExpandedMusicBarInfo(
                     .fillMaxWidth()
                     .height(250.dp)
                     .padding(horizontal = 15.dp, vertical = 10.dp)
-                    .clip(MaterialTheme.shapes.large)
+                    .clip(MaterialTheme.shapes.large),
+                contentAlignment = Alignment.Center
             ) {
-                audio.albumArt?.let {
-                    Image(
-                        bitmap = it,
-                        contentDescription = "expanded_music_player_album_art",
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier.fillMaxSize()
-                    )
+                val requestBuilder = Glide
+                    .with(LocalContext.current)
+                    .load(audio.uri)
+
+                GlideImage(
+                    model = audio.uri,
+                    contentDescription = "Current Audio Album Art",
+                    loading = placeholder(R.drawable.noart),
+                    failure = placeholder(R.drawable.ic_launcher_foreground),
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxSize()
+                ) {
+                    it
+                        .thumbnail(requestBuilder
+                            .load(audio.uri)
+                        )
                 }
             }
 

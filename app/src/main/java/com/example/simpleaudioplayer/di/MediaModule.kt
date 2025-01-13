@@ -40,6 +40,7 @@ object MediaModule {
         .setAudioAttributes(audioAttributes, true)
         .setHandleAudioBecomingNoisy(true) // for when people call when playing audio
         .setTrackSelector(DefaultTrackSelector(context))
+        .setWakeMode(C.WAKE_MODE_LOCAL) // Makes it so foreground music playback stays on when exiting (not killing) the app
         .build()
 
 

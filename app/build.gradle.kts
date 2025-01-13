@@ -81,7 +81,9 @@ dependencies {
     kapt("com.google.dagger:hilt-android-compiler:2.51.1")
 
     // Fast & Easy?? Image loading for Jetpack Compose:
-    implementation("com.github.bumptech.glide:glide:4.14.2")
+    implementation("com.github.bumptech.glide:glide:4.14.2") // class version?
+    implementation("com.github.bumptech.glide:compose:1.0.0-beta01") // compose version
+
 
     // Hilt View Model - For Android Compose?
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
