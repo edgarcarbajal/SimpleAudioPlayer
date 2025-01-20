@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.session.MediaSession
@@ -37,10 +38,13 @@ object MediaModule {
         @ApplicationContext context: Context,
         audioAttributes: AudioAttributes,
     ): ExoPlayer = ExoPlayer.Builder(context)
+        .setRenderersFactory(DefaultRenderersFactory(context).setExtensionRendererMode(
+            DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER
+        ))
         .setAudioAttributes(audioAttributes, true)
         .setHandleAudioBecomingNoisy(true) // for when people call when playing audio
         .setTrackSelector(DefaultTrackSelector(context))
-        .setWakeMode(C.WAKE_MODE_LOCAL) // Makes it so foreground music playback stays on when exiting (not killing) the app
+        //.setWakeMode(C.WAKE_MODE_LOCAL) // Makes it so foreground music playback stays on when exiting (not killing) the app
         .build()
 
 
