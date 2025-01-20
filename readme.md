@@ -36,12 +36,14 @@ java.lang.illegalargumentexception: Parcel: unknown type for value Audio(...)
 >when getting the list of audio files from device DB. To fix, going to implement a way so that we only get the album art of the current song (since that is the only one that can be seen in the UI anyway) using URI somehow?
 
 > Update (1/13/2025): Fixed the 2 issues above by removing the artwork retrieval, tried making a new artwork retrieval, but still not working correctly
+> 
 > Update (1/19/2025): In regards to the slight lag when scrolling, even with images now removed, this seems to be an issue with the implementation of `LazyColumn` in Jetpack Compose.
+> 
 > There seems to be some ways to mitigate this lag, so I will be looking into ways I can maybe get rid of some of it at a later date.
 
 
 
-- **(DONE!) Some songs show playback when they are not playing back audio (only in large audio lists) Happens frequently when skipping/changing to other songs 
+- **(DONE!)** Some songs show playback when they are not playing back audio (only in large audio lists) Happens frequently when skipping/changing to other songs 
 > Something to note from the on-device manual testing, it seems like sometimes the same songs are the ones that do not load up? - maybe its a loading issue? (like when the songs were added in list?)
 > 
 > Update (1/19/2025): Figured out a few days back that Android (and by extension Media3 library) did not support ALAC encoded audio files by default
