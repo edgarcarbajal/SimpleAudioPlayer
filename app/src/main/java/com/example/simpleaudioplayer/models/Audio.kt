@@ -1,5 +1,6 @@
 package com.example.simpleaudioplayer.models
 
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Parcel
 import android.os.Parcelable
@@ -14,7 +15,6 @@ data class Audio(
     val duration: Int,
     val title: String,
     val album: String,
-    val albumArt: ImageBitmap?,
     val artist: String,
     val genre: String,
 ): Parcelable {
@@ -26,7 +26,6 @@ data class Audio(
         parcel.readInt(),
         parcel.readString() ?: "NullParsed_String",
         parcel.readString() ?: "NullParsed_String",
-        TODO("albumArt"),
         parcel.readString() ?: "NullParsed_String",
         parcel.readString() ?: "NullParsed_String"
     ) {

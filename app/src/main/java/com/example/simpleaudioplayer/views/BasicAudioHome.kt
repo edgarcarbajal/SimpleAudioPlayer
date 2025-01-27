@@ -1,6 +1,8 @@
 package com.example.simpleaudioplayer.views
 
+import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
+import android.util.Size
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.MarqueeAnimationMode
@@ -67,7 +69,10 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
 import com.bumptech.glide.integration.compose.rememberGlidePreloadingData
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import com.example.simpleaudioplayer.R
 import com.example.simpleaudioplayer.models.Audio
 import kotlin.math.floor
@@ -94,6 +99,7 @@ fun BasicAudioHome(
     onItemClick: (Int) -> Unit,
     onNext: () -> Unit,
     onPrevious: () -> Unit,
+    artwork: Bitmap?
 ) {
     // Logic/State vars for Sheet - Should move later on to a view model to decouple logic??? Not sure
     var showMusicPlayerSheet by remember {
@@ -122,6 +128,7 @@ fun BasicAudioHome(
                 ) {
                     ExpandedMusicBarInfo(
                         audio = currentAudio,
+                        artwork = artwork,
                         progressString = progressString,
                         progress = progress,
                         onProgress = onProgress,
@@ -152,6 +159,7 @@ fun BasicAudioHome(
 @Composable
 fun ExpandedMusicBarInfo(
     audio: Audio,
+    artwork: Bitmap?,
     progressString: String,
     progress: Float,
     onProgress: (Float) -> Unit,
@@ -179,24 +187,15 @@ fun ExpandedMusicBarInfo(
                     .clip(MaterialTheme.shapes.large),
                 contentAlignment = Alignment.Center
             ) {
-                val requestBuilder = Glide
-                    .with(LocalContext.current)
-                    .load(audio.uri)
-
                 GlideImage(
-                    model = audio.uri,
+                    model = artwork,
                     contentDescription = "Current Audio Album Art",
                     loading = placeholder(R.drawable.noart),
                     failure = placeholder(R.drawable.ic_launcher_foreground),
                     modifier = Modifier
                         .padding(16.dp)
                         .fillMaxSize()
-                ) {
-                    it
-                        .thumbnail(requestBuilder
-                            .load(audio.uri)
-                        )
-                }
+                )
             }
 
             Spacer(modifier = Modifier.size(4.dp))
@@ -577,7 +576,6 @@ val dummyAudio = Audio(
     0,
     "Merry Christmas",
     "Jolly Holidays Vol. 1",
-    null,
     "Random artist",
     "Holiday",
 )
@@ -589,7 +587,6 @@ val dummyAudio2 = Audio(
     350000,
     "Please Christmas Don't Be Late",
     "Jolly Holidays Vol. 1",
-    null,
     "Random artist",
     "Holiday",
 )
@@ -599,6 +596,7 @@ val dummyAudio2 = Audio(
 fun ExpandedMusicBarInfo_Preview() {
     ExpandedMusicBarInfo(
         audio = dummyAudio2,
+        artwork = null,
         progressString = "2:20",
         progress = 0.4f,
         onProgress = { /*TODO*/ },
@@ -666,5 +664,6 @@ fun BasicAudioHome_Preview() {
         onItemClick = { /*TODO*/ },
         onNext = { /*TODO*/ },
         onPrevious = { /*TODO*/ },
+        artwork = null,
     )
 }

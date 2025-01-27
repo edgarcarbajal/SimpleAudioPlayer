@@ -28,9 +28,9 @@ java.lang.illegalargumentexception: Parcel: unknown type for value Audio(...)
 > Update(1/13/2025) - Fixed: App was sending the Audio media items thru IPC in android system (using the `Intent` class/object. All objects need sent thru `Intent` need to be `Parcelable`. A little Similar to what iOS does when it needs to decode data from JSON or plist files - data class needs to implement `Decodable` in order to work.
 > Thanks to [this blog post](https://prasanta-paul.blogspot.com/2010/06/android-parcelable-example.html) which helped me understand what I might needed to do.
 
-- **(DONE FOR NOW)** App does not handle well with a large list of audio files (Not sure the cutoff point - Tested 1 device with around 600+ files)
+- **(DONE!)** App does not handle well with a large list of audio files (Not sure the cutoff point - Tested 1 device with around 600+ files)
 
-- **(DONE FOR NOW)** It takes a while to load the audio list when large (5-15 sec) after accepting permissions (Might even require a few app reboots)
+- **(DONE!)** It takes a while to load the audio list when large (5-15 sec) after accepting permissions (Might even require a few app reboots)
 
 >Both items above (relating with speed of loading app) was found to be caused by retrieving album art
 >when getting the list of audio files from device DB. To fix, going to implement a way so that we only get the album art of the current song (since that is the only one that can be seen in the UI anyway) using URI somehow?
@@ -40,6 +40,8 @@ java.lang.illegalargumentexception: Parcel: unknown type for value Audio(...)
 > Update (1/19/2025): In regards to the slight lag when scrolling, even with images now removed, this seems to be an issue with the implementation of `LazyColumn` in Jetpack Compose.
 > 
 > There seems to be some ways to mitigate this lag, so I will be looking into ways I can maybe get rid of some of it at a later date.
+> 
+> Update (1/27/2025): Was able to load in the image of the current playing song (without compose stuttering) by loading it in the AudioViewModel, and passing the value into the composable
 
 
 

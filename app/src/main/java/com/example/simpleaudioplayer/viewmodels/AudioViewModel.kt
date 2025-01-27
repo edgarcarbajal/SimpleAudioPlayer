@@ -1,8 +1,13 @@
 package com.example.simpleaudioplayer.viewmodels
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.util.Log
+import android.util.Size
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -16,10 +21,12 @@ import com.example.simpleaudioplayer.services.AudioState
 import com.example.simpleaudioplayer.services.PlayerEvent
 import com.example.simpleaudioplayer.services.localdata.AudioStorage
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.io.FileNotFoundException
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -32,13 +39,13 @@ private val audioDefaultDummy = Audio(
     0,
     "",
     "",
-    null,
     "",
     "",
 )
 
 @HiltViewModel
 class AudioViewModel @Inject constructor(
+    @ApplicationContext context: Context,
     private val audioServiceHandler: AudioServiceHandler,
     private val databaseRepo: AudioStorage,
     savedStateHandle: SavedStateHandle, // Used to update states between UI and logic that lives in the AudioServices
@@ -50,6 +57,7 @@ class AudioViewModel @Inject constructor(
     var isPlaying by savedStateHandle.saveable{ mutableStateOf(false) }     // song playing state
     var currentSelectedAudio by savedStateHandle.saveable{ mutableStateOf(audioDefaultDummy) }  // currently selected song in UI
     var audioList by savedStateHandle.saveable{ mutableStateOf(listOf<Audio>()) }   // List of songs displayed to user
+    var artwork: Bitmap? by savedStateHandle.saveable{ mutableStateOf(null)}
 
     private val _uiState: MutableStateFlow<UIState> = MutableStateFlow(UIState.Initial)
     var uiState: StateFlow<UIState> = _uiState // exposed to other classes (this is the immutable ver. so other services cannot edit it)
@@ -68,7 +76,23 @@ class AudioViewModel @Inject constructor(
                     is AudioState.Buffering -> calcAudioProgressValue(mediaState.progress)
                     is AudioState.Playing -> isPlaying = mediaState.isPlaying
                     is AudioState.Progress -> calcAudioProgressValue(mediaState.progress)
-                    is AudioState.CurrentlyPlaying ->  currentSelectedAudio = audioList[mediaState.mediaItemIndex]
+                    is AudioState.CurrentlyPlaying -> {
+                        if(currentSelectedAudio != audioList[mediaState.mediaItemIndex]) { // caused stuttering/refresh(esp with image) when skipping with in-app scrubber/slider -so only set when item is different
+                            currentSelectedAudio = audioList[mediaState.mediaItemIndex]
+
+                            try {
+                                artwork = context.contentResolver.loadThumbnail(
+                                    currentSelectedAudio.uri,
+                                    Size(426, 426),
+                                    null
+                                )
+                            }
+                            catch (e: FileNotFoundException) {
+                                Log.e("AudioViewModel", String.format("AudioState Handler - 'Currently Playing' State: %s\nCircumventing by loading in a placeholder image!", e.toString()))
+                                artwork = null
+                            }
+                        }
+                    }
                     is AudioState.Ready -> {
                         duration = mediaState.duration
                         _uiState.value = UIState.Ready
@@ -104,6 +128,7 @@ class AudioViewModel @Inject constructor(
                     MediaMetadata.Builder()
                         .setAlbumArtist(audio.artist)
                         .setDisplayTitle(audio.title)
+                        .setGenre(audio.genre)
                         .setSubtitle(audio.displayName)
                         .build()
                 )

@@ -85,24 +85,9 @@ class AudioContentRetriever @Inject constructor(@ApplicationContext val context:
 
                         val uri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id)
 
-                        //use uri to get album art if exists
-                        val albumArt = null
-//                        val albumArt: ImageBitmap? = try {
-//                            val albumArtBM = context.contentResolver.loadThumbnail(
-//                                uri,
-//                                Size(426, 426),
-//                                null
-//                            )
-//
-//                            albumArtBM.asImageBitmap()
-//                        } catch (e: IOException) {
-//                            ContextCompat.getDrawable(context, R.drawable.noart)?.toBitmap()
-//                                ?.asImageBitmap()
-//                        }
-
                         // Make a new Audio instance(ie: new song) & save into list to return
                         audioList += Audio(
-                            uri, id, displayName, data, duration, title, album, albumArt, artist, genre
+                            uri, id, displayName, data, duration, title, album, artist, genre
                         )
                     }
                 }

@@ -81,7 +81,6 @@ class AudioServiceHandler @Inject constructor(
                     }
                 }
             }
-
             PlayerEvent.Stop -> stopAudioProgress()
 
             // Not sure what this state is for? since we have SeekTo - Maybe the UI version/connection?
