@@ -21,8 +21,6 @@ fun HomeScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        // TODO list:
-        // Fix slider updating too fast (might be because of expanded view)
         BasicAudioHome(
             progressString = audioVM.progressString,
             progress = audioVM.progress,

@@ -1,10 +1,7 @@
 package com.example.simpleaudioplayer.views
 
 import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
-import android.util.Size
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.MarqueeAnimationMode
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -27,13 +24,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Card
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -43,6 +44,8 @@ import androidx.compose.material3.SheetState
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -56,23 +59,16 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import com.bumptech.glide.Glide
-import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
-import com.bumptech.glide.integration.compose.rememberGlidePreloadingData
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.transition.Transition
 import com.example.simpleaudioplayer.R
 import com.example.simpleaudioplayer.models.Audio
 import kotlin.math.floor
@@ -108,7 +104,45 @@ fun BasicAudioHome(
     val musicSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
     )
+    var searchText by remember {
+        mutableStateOf("")
+    }
+    val focusManager = LocalFocusManager.current // Get focus to remove focus from searchbar when clicking outside of it
     Scaffold (
+        modifier = Modifier
+            .clickable {
+                focusManager.clearFocus()
+            },
+        topBar = {
+            CenterAlignedTopAppBar(
+                modifier = Modifier.padding(0.dp, 12.dp),
+                title = {
+                    TextField(
+                        searchText,
+                        onValueChange = {searchText = it},
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                        keyboardActions = KeyboardActions(onSearch = {
+                            focusManager.clearFocus()
+                        }),
+                        singleLine = true, // TODO: Cursor does not keep scrolling in either direction if there is still text to see in the textfield but cutoff by the view constraints
+                        label = { Text("Search") },
+                        trailingIcon = {
+                            Icon(
+                                Icons.Default.Clear,
+                                contentDescription = "Clear search text Button",
+                                modifier = Modifier
+                                    .clickable {
+                                        searchText = ""
+                                    }
+                            )
+                        },
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(16.dp)),
+                    )
+                },
+                scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+            )
+        },
         bottomBar = {
             BottomBarPlayer( // Minimized Audio Player - (might Modify this into a Sheet/card (not sure if Modal or not))
                 modifier = Modifier.clickable { showMusicPlayerSheet = true },

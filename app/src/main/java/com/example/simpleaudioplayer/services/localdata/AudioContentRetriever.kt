@@ -36,7 +36,7 @@ class AudioContentRetriever @Inject constructor(@ApplicationContext val context:
     private var selectionQuery: String? = "${MediaStore.Audio.AudioColumns.IS_MUSIC} = ?"
     private var selectionArg = arrayOf("1") // This will go in the '?' in the query above (ie: checking if IS_MUSIC column is true)
 
-    private val sortOrder = "${MediaStore.Audio.AudioColumns.DISPLAY_NAME} ASC"
+    private val sortOrder = "${MediaStore.Audio.AudioColumns.TITLE} ASC"
 
 
     // WorkerThread, meaning that fetching data will always happen in its own separate thread that is active??

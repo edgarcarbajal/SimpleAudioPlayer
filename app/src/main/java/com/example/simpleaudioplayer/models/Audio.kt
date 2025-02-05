@@ -19,7 +19,7 @@ data class Audio(
     val genre: String,
 ): Parcelable {
     constructor(parcel: Parcel) : this(
-        parcel.readParcelable(Uri::class.java.classLoader) ?: "NullParsed_URI".toUri(),
+        parcel.readParcelable(Uri::class.java.classLoader, Uri::class.java) ?: "NullParsed_URI".toUri(),
         parcel.readLong(),
         parcel.readString() ?: "NullParsed_String",
         parcel.readString() ?: "NullParsed_String",
