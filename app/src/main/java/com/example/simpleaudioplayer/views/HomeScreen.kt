@@ -35,6 +35,7 @@ fun HomeScreen(
             },
             onNext = { audioVM.onUIEvents(UIEvents.SeekToNext) },
             onPrevious = { audioVM.onUIEvents(UIEvents.SeekToPrevious) },
+            onSearch = { audioVM.onUIEvents(UIEvents.Search(it)) },
             artwork = audioVM.artwork,
         )
     }

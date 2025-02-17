@@ -99,6 +99,7 @@ fun BasicAudioHome(
     onItemClick: (Int) -> Unit,
     onNext: () -> Unit,
     onPrevious: () -> Unit,
+    onSearch: (String) -> Unit,
     artwork: Bitmap?
 ) {
     // Logic/State vars for Sheet - Should move later on to a view model to decouple logic??? Not sure
@@ -129,6 +130,7 @@ fun BasicAudioHome(
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                         keyboardActions = KeyboardActions(onSearch = {
                             focusManager.clearFocus()
+                            onSearch(searchText)
                         }),
                         singleLine = true, // TODO: Cursor does not keep scrolling in either direction if there is still text to see in the textfield but cutoff by the view constraints
                                         // After further testing, You can scroll the text left or right. Just not with the text cursor. pretend it has an invisible horizontal scroll bar and drag it left or right. Not sure still how to make the text cursor to scroll the field...
@@ -150,6 +152,7 @@ fun BasicAudioHome(
                 actions = {
                     IconButton(onClick = {
                         focusManager.clearFocus()
+                        onSearch(searchText)
                     }) {
                         Icon(
                             imageVector = Icons.Default.Search,
@@ -715,6 +718,7 @@ fun BasicAudioHome_Preview() {
         onItemClick = { /*TODO*/ },
         onNext = { /*TODO*/ },
         onPrevious = { /*TODO*/ },
+        onSearch = { /*TODO*/ },
         artwork = null,
     )
 }

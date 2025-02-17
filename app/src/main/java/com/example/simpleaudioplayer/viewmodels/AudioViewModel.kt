@@ -56,13 +56,14 @@ class AudioViewModel @Inject constructor(
     var progressString by savedStateHandle.saveable{ mutableStateOf("0:00") } // progress of audio in string format
     var isPlaying by savedStateHandle.saveable{ mutableStateOf(false) }     // song playing state
     var currentSelectedAudio by savedStateHandle.saveable{ mutableStateOf(audioDefaultDummy) }  // currently selected song in UI
+    var originalAudioList by savedStateHandle.saveable{ mutableStateOf(listOf<Audio>()) }   // List of songs Originally retrieved on first load (READ ONLY?)
     var audioList by savedStateHandle.saveable{ mutableStateOf(listOf<Audio>()) }   // List of songs displayed to user
     var artwork: Bitmap? by savedStateHandle.saveable{ mutableStateOf(null)}
 
     private val _uiState: MutableStateFlow<UIState> = MutableStateFlow(UIState.Initial)
     var uiState: StateFlow<UIState> = _uiState // exposed to other classes (this is the immutable ver. so other services cannot edit it)
 
-    //init the data we will use for viewmodel
+    //init the data we will use for viewmodel (only 1 time call)
     init {
         loadAudioData()
     }
@@ -77,7 +78,7 @@ class AudioViewModel @Inject constructor(
                     is AudioState.Playing -> isPlaying = mediaState.isPlaying
                     is AudioState.Progress -> calcAudioProgressValue(mediaState.progress)
                     is AudioState.CurrentlyPlaying -> {
-                        if(currentSelectedAudio != audioList[mediaState.mediaItemIndex]) { // caused stuttering/refresh(esp with image) when skipping with in-app scrubber/slider -so only set when item is different
+                        if(audioList.isNotEmpty() && currentSelectedAudio != audioList[mediaState.mediaItemIndex]) { // caused stuttering/refresh(esp with image) when skipping with in-app scrubber/slider -so only set when item is different
                             currentSelectedAudio = audioList[mediaState.mediaItemIndex]
 
                             try {
@@ -114,6 +115,7 @@ class AudioViewModel @Inject constructor(
         viewModelScope.launch {
             val audio = databaseRepo.getAudioData()
             audioList = audio // set audio List before using setMediaItems to map the list into media items
+            originalAudioList = audio
 
             setMediaItems()
         }
@@ -181,6 +183,12 @@ class AudioViewModel @Inject constructor(
                 // Update progress in ViewModel (so that it shows up in UI)
                 progress = uiEvents.newProgress
             }
+
+            //new Search method
+            is UIEvents.Search -> {
+                audioList = originalAudioList.filter { it.title.lowercase().contains(uiEvents.query.lowercase()) }
+                setMediaItems() // set new audio list in ExoPlayer to reflect the available choices in UI
+            }
         }
     }
 }
@@ -197,6 +205,9 @@ sealed class UIEvents {
     object Forwards: UIEvents()
     data class UpdateProgress(val newProgress: Float): UIEvents()
     object Stop: UIEvents()
+
+    // new - Event where we search a list of songs from home menu
+    data class Search(val query: String): UIEvents()
 }
 
 sealed class UIState {

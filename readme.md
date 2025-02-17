@@ -60,3 +60,9 @@ java.lang.illegalargumentexception: Parcel: unknown type for value Audio(...)
 > 
 > Thank you to the maintainers at Jellyfin for allowing access to this library.
 
+
+- Fix `AudioViewModel` such that it does not automatically start playing new song when searching - Also related to issue where if list of songs is not what is expected in current selected song (in bottom bar), it will stay there, displaying erroneous info
+- Later on, add ability to search by artist or album as well.(Not sure if to separate the queries, or allow all three categories to influence the results)
+- Add ability to read .m3u files for playlists - Also Maybe implement some sort of album feature(leveraging the playlist code?)
+> When adding playlists, add app-generated playlists. For example, keep a record of how many times a song is played, and create a playlist that contains the top 25 most played songs, Songs separated by metadata(ex: songs from different languages), Favorite Songs, etc...
+
