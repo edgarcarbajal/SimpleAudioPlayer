@@ -30,6 +30,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.BottomAppBar
@@ -37,6 +38,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -47,6 +49,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -59,6 +62,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -108,14 +112,16 @@ fun BasicAudioHome(
         mutableStateOf("")
     }
     val focusManager = LocalFocusManager.current // Get focus to remove focus from searchbar when clicking outside of it
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     Scaffold (
         modifier = Modifier
+            .nestedScroll(scrollBehavior.nestedScrollConnection) // Needed In order for TopAppBar to collapse when scrolling
             .clickable {
                 focusManager.clearFocus()
             },
         topBar = {
             CenterAlignedTopAppBar(
-                modifier = Modifier.padding(0.dp, 12.dp),
+                expandedHeight = TopAppBarDefaults.MediumAppBarExpandedHeight,
                 title = {
                     TextField(
                         searchText,
@@ -125,22 +131,33 @@ fun BasicAudioHome(
                             focusManager.clearFocus()
                         }),
                         singleLine = true, // TODO: Cursor does not keep scrolling in either direction if there is still text to see in the textfield but cutoff by the view constraints
+                                        // After further testing, You can scroll the text left or right. Just not with the text cursor. pretend it has an invisible horizontal scroll bar and drag it left or right. Not sure still how to make the text cursor to scroll the field...
                         label = { Text("Search") },
                         trailingIcon = {
-                            Icon(
-                                Icons.Default.Clear,
-                                contentDescription = "Clear search text Button",
-                                modifier = Modifier
-                                    .clickable {
-                                        searchText = ""
-                                    }
-                            )
+                            IconButton(onClick = {
+                                searchText = ""
+                            }) {
+                                Icon(
+                                    Icons.Default.Clear,
+                                    contentDescription = "Clear Search-Text Button",
+                                )
+                            }
                         },
                         modifier = Modifier
-                            .clip(RoundedCornerShape(16.dp)),
+                            .clip(RoundedCornerShape(16.dp))
                     )
                 },
-                scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+                actions = {
+                    IconButton(onClick = {
+                        focusManager.clearFocus()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "UI Search Button"
+                        )
+                    }
+                },
+                scrollBehavior = scrollBehavior,
             )
         },
         bottomBar = {
